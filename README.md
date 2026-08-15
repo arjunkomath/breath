@@ -7,8 +7,8 @@ Name each step of the breath, give it a length, and pick how long to sit. A circ
 ## Run it
 
 ```bash
-pnpm install
-pnpm dev
+bun install
+bun dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000).
@@ -36,7 +36,7 @@ app/
 ## Checks
 
 ```bash
-pnpm lint
-pnpm build
+bun run lint
+bun run build
 npx react-doctor@latest .
 ```
