@@ -12,9 +12,49 @@ const karla = Karla({
   subsets: ["latin"],
 });
 
+const title = "Breath — Custom Breathing Timer";
+const description =
+  "Create custom breathing exercises with flexible phases, guided animations, sound cues, and ready-made Box, 4-7-8, and Coherent Breathing presets.";
+const ogImage = `https://og.techulus.cloud/api/image?${new URLSearchParams({
+  title,
+  content: description,
+})}`;
+
 export const metadata: Metadata = {
-  title: "Breath",
-  description: "A breathing timer you set to your own rhythm.",
+  applicationName: "Breath",
+  title,
+  description,
+  keywords: [
+    "breathing timer",
+    "breathing exercises",
+    "Box breathing",
+    "4-7-8 breathing",
+    "Coherent Breathing",
+  ],
+  manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/logo.png", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/logo.png", type: "image/png", sizes: "512x512" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Breath",
+    statusBarStyle: "default",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Breath",
+    title,
+    description,
+    images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [{ url: ogImage, alt: title }],
+  },
 };
 
 export const viewport: Viewport = {

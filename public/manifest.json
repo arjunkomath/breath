@@ -1,0 +1,26 @@
+{
+  "name": "Breath — Custom Breathing Timer",
+  "short_name": "Breath",
+  "description": "Create custom breathing exercises with flexible phases, guided animations, sound cues, and ready-made Box, 4-7-8, and Coherent Breathing presets.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf6ef",
+  "theme_color": "#faf6ef",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en"
+}
