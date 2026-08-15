@@ -57,38 +57,41 @@ const VOICE_PATH: Record<Motion, string> = {
   contract: "/audio/voice/exhale.mp3",
 };
 
-let voiceBuffers: Record<Motion, AudioBuffer> | null = null;
-let voiceLoad: Promise<boolean> | null = null;
+const voiceBuffers: Partial<Record<Motion, AudioBuffer>> = {};
+const voiceLoads: Partial<Record<Motion, Promise<boolean>>> = {};
 
-export function primeVoice() {
-  if (voiceBuffers) return Promise.resolve(true);
-  if (voiceLoad) return voiceLoad;
+function loadVoice(motion: Motion) {
+  if (voiceBuffers[motion]) return Promise.resolve(true);
+  if (voiceLoads[motion]) return voiceLoads[motion];
 
   const audio = getAudioContext();
   if (!audio) return Promise.resolve(false);
 
-  voiceLoad = Promise.all(
-    (Object.entries(VOICE_PATH) as [Motion, string][]).map(async ([motion, path]) => {
-      const response = await fetch(path);
+  const path = VOICE_PATH[motion];
+  voiceLoads[motion] = fetch(path)
+    .then(async (response) => {
       if (!response.ok) throw new Error(`Could not load ${path}`);
-      return [motion, await audio.decodeAudioData(await response.arrayBuffer())] as const;
-    }),
-  )
-    .then((entries) => {
-      voiceBuffers = Object.fromEntries(entries) as Record<Motion, AudioBuffer>;
+      voiceBuffers[motion] = await audio.decodeAudioData(await response.arrayBuffer());
       return true;
     })
     .catch(() => {
-      voiceLoad = null;
+      delete voiceLoads[motion];
       return false;
     });
 
-  return voiceLoad;
+  return voiceLoads[motion];
+}
+
+export function primeVoice(motion?: Motion) {
+  if (motion) return loadVoice(motion);
+  return Promise.all((Object.keys(VOICE_PATH) as Motion[]).map(loadVoice)).then(
+    (loaded) => loaded.every(Boolean),
+  );
 }
 
 export function voiceCue(motion: Motion) {
   const audio = primeAudio();
-  const buffer = voiceBuffers?.[motion];
+  const buffer = voiceBuffers[motion];
   if (!audio || !buffer) return;
 
   const source = audio.createBufferSource();

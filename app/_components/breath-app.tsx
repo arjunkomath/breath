@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   getConfig,
   getServerConfig,
@@ -20,10 +20,18 @@ export default function BreathApp() {
   const [runId, setRunId] = useState(0);
   const [running, setRunning] = useState(false);
 
+  useEffect(() => {
+    void primeVoice();
+  }, []);
+
   const start = async () => {
     // Unlock audio here, while we still have the click gesture.
     if (config.sound || config.voice) primeAudio();
-    if (config.voice) await primeVoice();
+    if (config.voice) {
+      const firstCue = primeVoice(config.slots[0].motion);
+      void primeVoice();
+      await firstCue;
+    }
     setRunId((n) => n + 1);
     setRunning(true);
   };
