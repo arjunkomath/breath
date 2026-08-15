@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Breath
 
-## Getting Started
+A breathing timer you set to your own rhythm.
 
-First, run the development server:
+Name each step of the breath, give it a length, and pick how long to sit. A circle keeps count — it swells on the inhale, holds, and fades back down on the exhale.
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Each step has a name, a duration in seconds, and a motion — `↑` expand, `—` hold, `↓` contract. The motion is set per step rather than guessed from the name, so any pattern you invent still animates correctly. Holds keep whatever fullness the previous step ended on.
 
-## Learn More
+Sessions always end on a whole cycle. Ask for 5 minutes of 4-7-8 and you get 16 rounds — 5:04 — rather than being cut off mid-breath. The setup screen shows the real duration before you start.
 
-To learn more about Next.js, take a look at the following resources:
+Presets for Box, 4-7-8, and Coherent are one tap. Your settings are saved locally.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Space pauses, Escape ends.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Layout
 
-## Deploy on Vercel
+```
+app/
+  _lib/breath.ts        timing math, presets, saved settings
+  _lib/sound.ts         phase cues (Web Audio, no files)
+  _components/setup.tsx    the config screen
+  _components/session.tsx  the animated session
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Checks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run lint
+bun run build
+npx react-doctor@latest .
+```
