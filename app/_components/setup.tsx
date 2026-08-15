@@ -212,7 +212,7 @@ export default function Setup({ config, onChange, onStart }: Props) {
               onChange={(e) => onChange({ ...config, voice: e.target.checked })}
               className="size-4 accent-[var(--accent)]"
             />
-            AI-generated voice
+            voiceover
           </label>
         </div>
       </div>

@@ -23,9 +23,9 @@ Presets for Box, 4-7-8, and Coherent are one tap. Your settings are saved locall
 
 Space pauses, Escape ends.
 
-## Generate the AI voice cues
+## Generate the voiceover cues
 
-The optional AI voice uses three static audio files, so the OpenAI key is never
+The optional voiceover uses three static audio files, so the OpenAI key is never
 sent to the browser. Generate or replace them with:
 
 ```bash
