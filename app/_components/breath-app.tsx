@@ -7,7 +7,7 @@ import {
   setConfig,
   subscribeConfig,
 } from "../_lib/breath";
-import { primeAudio } from "../_lib/sound";
+import { primeAudio, primeVoice } from "../_lib/sound";
 import Session from "./session";
 import Setup from "./setup";
 
@@ -20,9 +20,10 @@ export default function BreathApp() {
   const [runId, setRunId] = useState(0);
   const [running, setRunning] = useState(false);
 
-  const start = () => {
+  const start = async () => {
     // Unlock audio here, while we still have the click gesture.
-    if (config.sound) primeAudio();
+    if (config.sound || config.voice) primeAudio();
+    if (config.voice) await primeVoice();
     setRunId((n) => n + 1);
     setRunning(true);
   };

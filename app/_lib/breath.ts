@@ -11,6 +11,7 @@ export type Config = {
   slots: Slot[];
   totalMinutes: number;
   sound: boolean;
+  voice: boolean;
 };
 
 export const MOTION_ORDER: Motion[] = ["expand", "hold", "contract"];
@@ -41,6 +42,7 @@ export const DEFAULT_CONFIG: Config = {
   ],
   totalMinutes: 5,
   sound: true,
+  voice: false,
 };
 
 export const PRESETS: { name: string; hint: string; slots: Omit<Slot, "id">[] }[] = [
@@ -160,6 +162,7 @@ export function loadConfig(): Config | null {
       })),
       totalMinutes: Number(parsed.totalMinutes) || 5,
       sound: parsed.sound !== false,
+      voice: parsed.voice === true,
     };
   } catch {
     return null;

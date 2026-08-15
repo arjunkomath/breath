@@ -10,7 +10,7 @@ import {
   scaleRamps,
   type Config,
 } from "../_lib/breath";
-import { chime, cue, primeAudio } from "../_lib/sound";
+import { chime, cue, primeAudio, voiceCue } from "../_lib/sound";
 
 const R = 120;
 const C = 2 * Math.PI * R;
@@ -22,7 +22,7 @@ type Props = {
 };
 
 export default function Session({ config, onExit, onRestart }: Props) {
-  const { slots, sound } = config;
+  const { slots, sound, voice } = config;
 
   const cycle = useMemo(() => cycleSeconds(slots), [slots]);
   const planned = useMemo(
@@ -78,15 +78,16 @@ export default function Session({ config, onExit, onRestart }: Props) {
     if (phaseKey < 0 || paused || lastCued.current === phaseKey) return;
     lastCued.current = phaseKey;
     if (sound) cue(slots[phaseKey % slots.length].motion);
-  }, [phaseKey, paused, sound, slots]);
+    if (voice) voiceCue(slots[phaseKey % slots.length].motion);
+  }, [phaseKey, paused, sound, slots, voice]);
 
   useEffect(() => {
     if (done && sound) chime();
   }, [done, sound]);
 
   useEffect(() => {
-    if (sound) primeAudio();
-  }, [sound]);
+    if (sound || voice) primeAudio();
+  }, [sound, voice]);
 
   // Keeps the screen awake mid-session where the browser supports it.
   useEffect(() => {

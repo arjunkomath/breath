@@ -23,14 +23,29 @@ Presets for Box, 4-7-8, and Coherent are one tap. Your settings are saved locall
 
 Space pauses, Escape ends.
 
+## Generate the AI voice cues
+
+The optional AI voice uses three static audio files, so the OpenAI key is never
+sent to the browser. Generate or replace them with:
+
+```bash
+export OPENAI_API_KEY="your-key"
+bun run generate:voice
+```
+
+This writes `inhale.mp3`, `hold.mp3`, and `exhale.mp3` to
+`public/audio/voice/`. Rerunning the command replaces the existing cues.
+
 ## Layout
 
 ```
 app/
   _lib/breath.ts        timing math, presets, saved settings
-  _lib/sound.ts         phase cues (Web Audio, no files)
+  _lib/sound.ts         tone and generated voice cues
   _components/setup.tsx    the config screen
   _components/session.tsx  the animated session
+scripts/voice/
+  generate.mjs          reusable OpenAI voice generator
 ```
 
 ## Checks

@@ -185,7 +185,7 @@ export default function Setup({ config, onChange, onStart }: Props) {
           )}
         </p>
 
-        <div className="mt-10 flex items-center gap-7">
+        <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-2">
           <button
             type="button"
             onClick={onStart}
@@ -202,7 +202,17 @@ export default function Setup({ config, onChange, onStart }: Props) {
               onChange={(e) => onChange({ ...config, sound: e.target.checked })}
               className="size-4 accent-[var(--accent)]"
             />
-            sound
+            tone
+          </label>
+
+          <label className="flex cursor-pointer touch-manipulation items-center gap-2 py-2 text-sm text-ink-soft select-none">
+            <input
+              type="checkbox"
+              checked={config.voice}
+              onChange={(e) => onChange({ ...config, voice: e.target.checked })}
+              className="size-4 accent-[var(--accent)]"
+            />
+            AI-generated voice
           </label>
         </div>
       </div>
