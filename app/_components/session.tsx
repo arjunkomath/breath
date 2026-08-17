@@ -172,7 +172,7 @@ export default function Session({ config, onExit, onRestart }: Props) {
               className={`absolute inset-0 grid place-items-center ${index === 0 ? "" : "motion-reduce:hidden"}`}
             >
               <div
-                className="size-1/2 rounded-full bg-accent opacity-15 motion-reduce:!transform-none"
+                className="size-1/2 rounded-full bg-accent opacity-10 motion-reduce:!transform-none"
                 style={{
                   transform: `rotate(${angle + rotation}deg) translate(${petalOffset}%, ${petalOffset}%)`,
                 }}
