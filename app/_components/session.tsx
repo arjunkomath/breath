@@ -3,8 +3,8 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import {
   cycleSeconds,
-  easeInOutSine,
   formatClock,
+  MOTION_LABEL,
   phaseAt,
   plannedSeconds,
   scaleRamps,
@@ -12,8 +12,8 @@ import {
 } from "../_lib/breath";
 import { chime, cue, primeAudio, voiceCue } from "../_lib/sound";
 
-const R = 120;
-const C = 2 * Math.PI * R;
+const START_DELAY = 3;
+const PETAL_ANGLES = Array.from({ length: 8 }, (_, index) => index * 45);
 
 type Props = {
   config: Config;
@@ -34,12 +34,23 @@ export default function Session({ config, onExit, onRestart }: Props) {
   const [elapsed, setElapsed] = useState(0);
   const [paused, setPaused] = useState(false);
   const [done, setDone] = useState(false);
+  const [countdown, setCountdown] = useState(START_DELAY);
 
   const baseRef = useRef(0);
   const anchorRef = useRef(0);
 
   useEffect(() => {
-    if (paused || done) return;
+    if (countdown > 0) {
+      const timer = window.setTimeout(
+        () => setCountdown((seconds) => seconds - 1),
+        1000,
+      );
+      return () => window.clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    if (countdown > 0 || paused || done) return;
 
     anchorRef.current = performance.now();
     let frame = requestAnimationFrame(function tick() {
@@ -60,26 +71,50 @@ export default function Session({ config, onExit, onRestart }: Props) {
         baseRef.current + (performance.now() - anchorRef.current) / 1000,
       );
     };
-  }, [paused, done, planned]);
+  }, [countdown, paused, done, planned]);
 
   const phase = phaseAt(slots, Math.min(elapsed, planned - 0.0001), cycle);
   const slot = slots[phase.index] ?? slots[0];
   const ramp = ramps[phase.index] ?? { from: 0, to: 1 };
+  const slotProgress = Math.min(1, phase.slotElapsed / slot.seconds);
+  const motionProgress =
+    slot.motion === "expand"
+      ? Math.sin((Math.PI / 2) * slotProgress)
+      : slot.motion === "contract"
+        ? 1 - Math.cos((Math.PI / 2) * slotProgress)
+        : 0;
   const fullness =
-    ramp.from + (ramp.to - ramp.from) * easeInOutSine(phase.slotElapsed / slot.seconds);
-  // The glow fades out well before its edge, so it can bleed past the ring.
-  const discR = R * (0.62 + 0.53 * fullness);
+    ramp.from + (ramp.to - ramp.from) * motionProgress;
+  const movingSlots = slots.reduce(
+    (count, item) => count + (item.motion === "hold" ? 0 : 1),
+    0,
+  );
+  const completedMovements = slots
+    .slice(0, phase.index)
+    .reduce(
+      (count, item) => count + (item.motion === "hold" ? 0 : 1),
+      phase.cycle * movingSlots,
+    );
+  const rotation = ((completedMovements + motionProgress) * 180) % 360;
+  const petalOffset = done ? 0 : (fullness * 100) / 6;
   const remaining = Math.max(1, Math.ceil(slot.seconds - phase.slotElapsed));
 
   const phaseKey = done ? -1 : phase.cycle * slots.length + phase.index;
   const lastCued = useRef<number | null>(null);
 
   useEffect(() => {
-    if (phaseKey < 0 || paused || lastCued.current === phaseKey) return;
+    if (
+      countdown > 0 ||
+      phaseKey < 0 ||
+      paused ||
+      lastCued.current === phaseKey
+    ) {
+      return;
+    }
     lastCued.current = phaseKey;
     if (sound) cue(slots[phaseKey % slots.length].motion);
     if (voice) voiceCue(slots[phaseKey % slots.length].motion);
-  }, [phaseKey, paused, sound, slots, voice]);
+  }, [countdown, phaseKey, paused, sound, slots, voice]);
 
   useEffect(() => {
     if (done && sound) chime();
@@ -112,7 +147,7 @@ export default function Session({ config, onExit, onRestart }: Props) {
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.code === "Space") {
       e.preventDefault();
-      if (!done) setPaused((p) => !p);
+      if (countdown === 0 && !done) setPaused((p) => !p);
     } else if (e.key === "Escape") {
       onExit();
     }
@@ -129,39 +164,32 @@ export default function Session({ config, onExit, onRestart }: Props) {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-6 sm:py-10">
-      <div className="relative">
-        <svg
-          viewBox="-150 -150 300 300"
-          className="w-[min(76vw,40vh,21rem)]"
-          aria-hidden="true"
-        >
-          <defs>
-            {/* A gradient rather than a blur filter: the same soft falloff, but
-                cheap enough to resize every frame. */}
-            <radialGradient id="breath-glow">
-              <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.22} />
-              <stop offset="48%" stopColor="var(--accent)" stopOpacity={0.16} />
-              <stop offset="76%" stopColor="var(--accent)" stopOpacity={0.06} />
-              <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
-            </radialGradient>
-          </defs>
-
-          <circle r={R} fill="none" stroke="var(--rule)" strokeWidth={1} />
-          <circle
-            r={R}
-            fill="none"
-            stroke="var(--accent)"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeDasharray={`${(phase.within / cycle) * C} ${C}`}
-            transform="rotate(-90)"
-            opacity={done ? 0 : 0.7}
-          />
-          <circle r={done ? R : discR} fill="url(#breath-glow)" />
-        </svg>
+      <div className="relative size-[min(76vw,40vh,21rem)]">
+        <div className="absolute inset-0" aria-hidden="true">
+          {PETAL_ANGLES.map((angle, index) => (
+            <div
+              key={angle}
+              className={`absolute inset-0 grid place-items-center ${index === 0 ? "" : "motion-reduce:hidden"}`}
+            >
+              <div
+                className="size-1/2 rounded-full bg-accent opacity-15 motion-reduce:!transform-none"
+                style={{
+                  transform: `rotate(${angle + rotation}deg) translate(${petalOffset}%, ${petalOffset}%)`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-          {done ? (
+          {countdown > 0 ? (
+            <>
+              <p className="font-display text-3xl sm:text-4xl">Ready</p>
+              <p aria-live="polite" className="text-lg text-ink-soft tabular-nums">
+                {countdown}
+              </p>
+            </>
+          ) : done ? (
             <>
               <p className="font-display text-3xl sm:text-4xl">Done</p>
               <p className="text-sm text-ink-soft tabular-nums">
@@ -171,7 +199,7 @@ export default function Session({ config, onExit, onRestart }: Props) {
           ) : (
             <>
               <p aria-live="polite" className="font-display text-3xl sm:text-4xl">
-                {paused ? "Paused" : slot.label || `Step ${phase.index + 1}`}
+                {paused ? "Paused" : MOTION_LABEL[slot.motion]}
               </p>
               <p className="text-lg text-ink-soft tabular-nums">{remaining}</p>
             </>
@@ -210,6 +238,14 @@ export default function Session({ config, onExit, onRestart }: Props) {
               Change rhythm
             </button>
           </>
+        ) : countdown > 0 ? (
+          <button
+            type="button"
+            onClick={onExit}
+            className="flex-1 touch-manipulation border border-rule py-4 text-ink-soft transition-colors hover:border-accent hover:text-accent"
+          >
+            Cancel
+          </button>
         ) : (
           <>
             <button

@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Karla } from "next/font/google";
+import { Archivo } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-});
-
-const karla = Karla({
-  variable: "--font-karla",
-  subsets: ["latin"],
+  axes: ["wdth"],
 });
 
 const title = "Breath — Custom Breathing Timer";
@@ -66,10 +62,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${karla.variable} antialiased`}
-    >
+    <html lang="en" className={`${archivo.variable} antialiased`}>
       {/* dvh rather than a percentage chain, so mobile browser chrome
           collapsing doesn't leave the layout short. */}
       <body className="flex min-h-dvh flex-col">{children}</body>

@@ -2,9 +2,14 @@ export type Motion = "expand" | "hold" | "contract";
 
 export type Slot = {
   id: string;
-  label: string;
   seconds: number;
   motion: Motion;
+};
+
+export type CustomPreset = {
+  id: string;
+  name: string;
+  slots: Omit<Slot, "id">[];
 };
 
 export type Config = {
@@ -12,20 +17,15 @@ export type Config = {
   totalMinutes: number;
   sound: boolean;
   voice: boolean;
+  customPresets: CustomPreset[];
 };
 
 export const MOTION_ORDER: Motion[] = ["expand", "hold", "contract"];
 
-export const MOTION_GLYPH: Record<Motion, string> = {
-  expand: "↑",
-  hold: "—",
-  contract: "↓",
-};
-
-export const MOTION_NAME: Record<Motion, string> = {
-  expand: "expands",
-  hold: "holds",
-  contract: "contracts",
+export const MOTION_LABEL: Record<Motion, string> = {
+  expand: "Inhale",
+  hold: "Hold",
+  contract: "Exhale",
 };
 
 export function uid() {
@@ -37,12 +37,13 @@ export function uid() {
 // Fixed ids so the server and client render identical markup on first paint.
 export const DEFAULT_CONFIG: Config = {
   slots: [
-    { id: "d1", label: "Inhale", seconds: 4, motion: "expand" },
-    { id: "d2", label: "Exhale", seconds: 6, motion: "contract" },
+    { id: "d1", seconds: 4, motion: "expand" },
+    { id: "d2", seconds: 6, motion: "contract" },
   ],
   totalMinutes: 5,
   sound: true,
   voice: false,
+  customPresets: [],
 };
 
 export const PRESETS: { name: string; hint: string; slots: Omit<Slot, "id">[] }[] = [
@@ -50,27 +51,27 @@ export const PRESETS: { name: string; hint: string; slots: Omit<Slot, "id">[] }[
     name: "Box",
     hint: "4·4·4·4",
     slots: [
-      { label: "Inhale", seconds: 4, motion: "expand" },
-      { label: "Hold", seconds: 4, motion: "hold" },
-      { label: "Exhale", seconds: 4, motion: "contract" },
-      { label: "Hold", seconds: 4, motion: "hold" },
+      { seconds: 4, motion: "expand" },
+      { seconds: 4, motion: "hold" },
+      { seconds: 4, motion: "contract" },
+      { seconds: 4, motion: "hold" },
     ],
   },
   {
     name: "4-7-8",
     hint: "unwind",
     slots: [
-      { label: "Inhale", seconds: 4, motion: "expand" },
-      { label: "Hold", seconds: 7, motion: "hold" },
-      { label: "Exhale", seconds: 8, motion: "contract" },
+      { seconds: 4, motion: "expand" },
+      { seconds: 7, motion: "hold" },
+      { seconds: 8, motion: "contract" },
     ],
   },
   {
     name: "Coherent",
     hint: "5·5",
     slots: [
-      { label: "Inhale", seconds: 5, motion: "expand" },
-      { label: "Exhale", seconds: 5, motion: "contract" },
+      { seconds: 5, motion: "expand" },
+      { seconds: 5, motion: "contract" },
     ],
   },
 ];
@@ -92,7 +93,6 @@ export function plannedSeconds(slots: Slot[], totalMinutes: number) {
 export type Phase = {
   index: number;
   cycle: number;
-  within: number;
   slotElapsed: number;
 };
 
@@ -105,13 +105,12 @@ export function phaseAt(slots: Slot[], elapsed: number, cycle: number): Phase {
       return {
         index: i,
         cycle: Math.floor(elapsed / cycle),
-        within,
         slotElapsed: within - acc,
       };
     }
     acc = next;
   }
-  return { index: 0, cycle: 0, within, slotElapsed: within };
+  return { index: 0, cycle: 0, slotElapsed: within };
 }
 
 function endScale(motion: Motion, current: number) {
@@ -135,16 +134,20 @@ export function scaleRamps(slots: Slot[]) {
   });
 }
 
-export function easeInOutSine(t: number) {
-  return 0.5 - Math.cos(Math.PI * Math.min(1, Math.max(0, t))) / 2;
-}
-
 export function formatClock(totalSeconds: number) {
   const s = Math.max(0, Math.round(totalSeconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
 const STORAGE_KEY = "breath.config.v1";
+
+function cleanSlot(slot: Partial<Slot>): Omit<Slot, "id"> {
+  const motion = slot.motion;
+  return {
+    seconds: Number(slot.seconds) || 1,
+    motion: motion && MOTION_ORDER.includes(motion) ? motion : "hold",
+  };
+}
 
 export function loadConfig(): Config | null {
   try {
@@ -156,13 +159,30 @@ export function loadConfig(): Config | null {
     return {
       slots: parsed.slots.map((slot) => ({
         id: typeof slot.id === "string" ? slot.id : uid(),
-        label: typeof slot.label === "string" ? slot.label : "Breathe",
-        seconds: Number(slot.seconds) || 1,
-        motion: MOTION_ORDER.includes(slot.motion) ? slot.motion : "hold",
+        ...cleanSlot(slot),
       })),
       totalMinutes: Number(parsed.totalMinutes) || 5,
       sound: parsed.sound !== false,
       voice: parsed.voice === true,
+      customPresets: Array.isArray(parsed.customPresets)
+        ? parsed.customPresets.flatMap((preset) => {
+            if (
+              typeof preset?.name !== "string" ||
+              !Array.isArray(preset.slots) ||
+              preset.slots.length === 0
+            ) {
+              return [];
+            }
+
+            return [
+              {
+                id: typeof preset.id === "string" ? preset.id : uid(),
+                name: preset.name.trim() || "Saved rhythm",
+                slots: preset.slots.map(cleanSlot),
+              },
+            ];
+          })
+        : [],
     };
   } catch {
     return null;

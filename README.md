@@ -2,7 +2,7 @@
 
 A breathing timer you set to your own rhythm.
 
-Name each step of the breath, give it a length, and pick how long to sit. A circle keeps count — it swells on the inhale, holds, and fades back down on the exhale.
+Choose each step of the breath, give it a length, and pick how long to sit. A circle keeps count — it swells on the inhale, holds, and fades back down on the exhale.
 
 ## Run it
 
@@ -15,11 +15,11 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ## How it works
 
-Each step has a name, a duration in seconds, and a motion — `↑` expand, `—` hold, `↓` contract. The motion is set per step rather than guessed from the name, so any pattern you invent still animates correctly. Holds keep whatever fullness the previous step ended on.
+Each step is Inhale, Hold, or Exhale and has a duration in seconds. The phase controls the circle motion, and holds keep whatever fullness the previous step ended on.
 
 Sessions always end on a whole cycle. Ask for 5 minutes of 4-7-8 and you get 16 rounds — 5:04 — rather than being cut off mid-breath. The setup screen shows the real duration before you start.
 
-Presets for Box, 4-7-8, and Coherent are one tap. Your settings are saved locally.
+Presets for Box, 4-7-8, and Coherent are one tap. You can name and save your own rhythms too; everything stays on your device.
 
 Space pauses, Escape ends.
 

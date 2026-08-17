@@ -3,8 +3,7 @@
 import {
   cycleSeconds,
   formatClock,
-  MOTION_GLYPH,
-  MOTION_NAME,
+  MOTION_LABEL,
   MOTION_ORDER,
   plannedSeconds,
   PRESETS,
@@ -35,46 +34,98 @@ export default function Setup({ config, onChange, onStart }: Props) {
   const addSlot = () =>
     onChange({
       ...config,
-      slots: [
-        ...slots,
-        { id: uid(), label: "Hold", seconds: 4, motion: "hold" },
-      ],
+      slots: [...slots, { id: uid(), seconds: 4, motion: "hold" }],
     });
 
   const removeSlot = (id: string) =>
     onChange({ ...config, slots: slots.filter((slot) => slot.id !== id) });
 
-  const applyPreset = (preset: (typeof PRESETS)[number]) =>
+  const applyPreset = (preset: { slots: Omit<Slot, "id">[] }) =>
     onChange({
       ...config,
       slots: preset.slots.map((slot) => ({ ...slot, id: uid() })),
     });
 
+  const savePreset = () => {
+    const name = window.prompt("Name this rhythm")?.trim();
+    if (!name) return;
+
+    onChange({
+      ...config,
+      customPresets: [
+        ...config.customPresets,
+        {
+          id: uid(),
+          name,
+          slots: slots.map(({ seconds, motion }) => ({
+            seconds,
+            motion,
+          })),
+        },
+      ],
+    });
+  };
+
+  const removePreset = (id: string) =>
+    onChange({
+      ...config,
+      customPresets: config.customPresets.filter((preset) => preset.id !== id),
+    });
+
   return (
     <main className="flex flex-1 flex-col justify-center px-6 py-14 sm:px-12">
       <div className="w-full max-w-lg sm:ml-[8vw]">
-        <h1 className="font-display text-5xl tracking-tight sm:text-6xl">
+        <h1 className="font-display text-5xl sm:text-6xl">
           Breath
         </h1>
-        <p className="mt-3 max-w-xs text-ink-soft leading-7">
-          Name each step of the breath, give it a length, and let the circle
-          keep count.
-        </p>
 
-        <div className="mt-11 flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.name}
-              type="button"
-              onClick={() => applyPreset(preset)}
-              className="group touch-manipulation py-1.5 text-sm text-ink-soft transition-colors hover:text-accent"
-            >
-              {preset.name}
-              <span className="ml-1.5 text-ink-faint group-hover:text-accent/70">
-                {preset.hint}
+        <div className="mt-11">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+            {PRESETS.map((preset) => (
+              <button
+                key={preset.name}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                className="group touch-manipulation py-1.5 text-sm text-ink-soft transition-colors hover:text-accent"
+              >
+                {preset.name}
+                <span className="ml-1.5 text-ink-faint group-hover:text-accent/70">
+                  {preset.hint}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {config.customPresets.length > 0 ? (
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-5 gap-y-1">
+              <span className="py-1.5 text-xs tracking-widest text-ink-faint uppercase">
+                saved
               </span>
-            </button>
-          ))}
+              {config.customPresets.map((preset) => (
+                <span key={preset.id} className="flex items-baseline">
+                  <button
+                    type="button"
+                    onClick={() => applyPreset(preset)}
+                    className="group touch-manipulation py-1.5 text-sm text-ink-soft transition-colors hover:text-accent"
+                  >
+                    {preset.name}
+                    <span className="ml-1.5 text-ink-faint group-hover:text-accent/70">
+                      {preset.slots.map((slot) => slot.seconds).join("·")}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removePreset(preset.id)}
+                    aria-label={`Delete ${preset.name} preset`}
+                    title={`Delete ${preset.name}`}
+                    className="touch-manipulation px-1.5 py-1.5 text-ink-faint transition-colors hover:text-accent"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <ul className="mt-6 border-t border-rule">
@@ -83,31 +134,20 @@ export default function Setup({ config, onChange, onStart }: Props) {
               key={slot.id}
               className="flex items-center gap-2 border-b border-rule py-2.5 sm:gap-3"
             >
-              <button
-                type="button"
-                onClick={() =>
-                  patch(slot.id, {
-                    motion:
-                      MOTION_ORDER[
-                        (MOTION_ORDER.indexOf(slot.motion) + 1) %
-                          MOTION_ORDER.length
-                      ],
-                  })
+              <select
+                value={slot.motion}
+                onChange={(e) =>
+                  patch(slot.id, { motion: e.target.value as Slot["motion"] })
                 }
-                aria-label={`Step ${i + 1} ${MOTION_NAME[slot.motion]} — change`}
-                title={`The circle ${MOTION_NAME[slot.motion]}`}
-                className="-my-2.5 w-8 shrink-0 touch-manipulation py-2.5 text-center text-accent transition-opacity hover:opacity-60"
+                aria-label={`Step ${i + 1} phase`}
+                className="min-w-0 flex-1 cursor-pointer bg-transparent text-lg outline-none"
               >
-                {MOTION_GLYPH[slot.motion]}
-              </button>
-
-              <input
-                value={slot.label}
-                onChange={(e) => patch(slot.id, { label: e.target.value })}
-                placeholder={`Step ${i + 1}`}
-                aria-label={`Step ${i + 1} name`}
-                className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-ink-faint"
-              />
+                {MOTION_ORDER.map((motion) => (
+                  <option key={motion} value={motion}>
+                    {MOTION_LABEL[motion]}
+                  </option>
+                ))}
+              </select>
 
               <input
                 type="number"
@@ -139,13 +179,22 @@ export default function Setup({ config, onChange, onStart }: Props) {
           ))}
         </ul>
 
-        <button
-          type="button"
-          onClick={addSlot}
-          className="mt-2 touch-manipulation py-2 text-sm text-ink-soft transition-colors hover:text-accent"
-        >
-          + add step
-        </button>
+        <div className="mt-2 flex items-baseline gap-6">
+          <button
+            type="button"
+            onClick={addSlot}
+            className="touch-manipulation py-2 text-sm text-ink-soft transition-colors hover:text-accent"
+          >
+            + add step
+          </button>
+          <button
+            type="button"
+            onClick={savePreset}
+            className="touch-manipulation py-2 text-sm text-ink-soft transition-colors hover:text-accent"
+          >
+            save rhythm
+          </button>
+        </div>
 
         <div className="mt-10 flex items-baseline gap-3">
           <label htmlFor="total" className="text-ink-soft">
