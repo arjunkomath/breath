@@ -4,6 +4,8 @@ A breathing timer you set to your own rhythm.
 
 Choose each step of the breath, give it a length, and pick how long to sit. A circle keeps count — it swells on the inhale, holds, and fades back down on the exhale.
 
+Built with SvelteKit and prerendered as a static site.
+
 ## Run it
 
 ```bash
@@ -11,7 +13,14 @@ bun install
 bun dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Then open [http://localhost:5173](http://localhost:5173).
+
+To preview the production build:
+
+```bash
+bun run build
+bun run preview
+```
 
 ## How it works
 
