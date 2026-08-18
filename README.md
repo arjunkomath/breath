@@ -4,6 +4,8 @@ A breathing timer you set to your own rhythm.
 
 Choose each step of the breath, give it a length, and pick how long to sit. A circle keeps count — it swells on the inhale, holds, and fades back down on the exhale.
 
+Built with SvelteKit
+
 ## Run it
 
 ```bash
@@ -11,7 +13,14 @@ bun install
 bun dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Then open [http://localhost:5173](http://localhost:5173).
+
+To preview the production build:
+
+```bash
+bun run build
+bun run preview
+```
 
 ## How it works
 
@@ -39,13 +48,14 @@ This writes `inhale.mp3`, `hold.mp3`, and `exhale.mp3` to
 ## Layout
 
 ```
-app/
-  _lib/breath.ts        timing math, presets, saved settings
-  _lib/sound.ts         tone and generated voice cues
-  _components/setup.tsx    the config screen
-  _components/session.tsx  the animated session
+src/
+  lib/breath.ts             timing math, presets, saved settings
+  lib/sound.ts              tone and generated voice cues
+  components/Setup.svelte   the config screen
+  components/Session.svelte the animated session
+  routes/+page.svelte       the prerendered app page
 scripts/voice/
-  generate.mjs          reusable OpenAI voice generator
+  generate.mjs              reusable OpenAI voice generator
 ```
 
 ## Checks
@@ -53,5 +63,11 @@ scripts/voice/
 ```bash
 bun run lint
 bun run build
-npx react-doctor@latest .
+```
+
+## Docker
+
+```bash
+docker build -t breath .
+docker run --rm -p 3000:3000 breath
 ```
