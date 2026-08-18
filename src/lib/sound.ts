@@ -71,7 +71,9 @@ function loadVoice(motion: Motion) {
   voiceLoads[motion] = fetch(path)
     .then(async (response) => {
       if (!response.ok) throw new Error(`Could not load ${path}`);
-      voiceBuffers[motion] = await audio.decodeAudioData(await response.arrayBuffer());
+      voiceBuffers[motion] = await audio.decodeAudioData(
+        await response.arrayBuffer(),
+      );
       return true;
     })
     .catch(() => {
@@ -84,9 +86,9 @@ function loadVoice(motion: Motion) {
 
 export function primeVoice(motion?: Motion) {
   if (motion) return loadVoice(motion);
-  return Promise.all((Object.keys(VOICE_PATH) as Motion[]).map(loadVoice)).then(
-    (loaded) => loaded.every(Boolean),
-  );
+  return Promise.all(
+    (Object.keys(VOICE_PATH) as Motion[]).map(loadVoice),
+  ).then((loaded) => loaded.every(Boolean));
 }
 
 export function voiceCue(motion: Motion) {

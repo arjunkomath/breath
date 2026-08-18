@@ -30,14 +30,20 @@
   --color-ink-faint: var(--ink-faint);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
-  --font-display: var(--font-archivo);
-  --font-sans: var(--font-archivo);
+  --font-display: "Archivo Variable", ui-sans-serif, sans-serif;
+  --font-sans: "Archivo Variable", ui-sans-serif, sans-serif;
+}
+
+#app {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+  font-family: "Archivo Variable", ui-sans-serif, sans-serif;
   font-size: 1.125rem;
   font-stretch: 75%;
   letter-spacing: -0.02em;

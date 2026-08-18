@@ -189,41 +189,10 @@ export function loadConfig(): Config | null {
   }
 }
 
-function saveConfig(config: Config) {
+export function saveConfig(config: Config) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   } catch {
     // Private browsing or a full quota — settings just won't persist.
   }
-}
-
-/**
- * localStorage is the source of truth, exposed as an external store so the
- * server renders defaults and the client swaps in saved settings on hydration.
- */
-let cached = DEFAULT_CONFIG;
-let read = false;
-const listeners = new Set<() => void>();
-
-export function subscribeConfig(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-export function getConfig() {
-  if (!read) {
-    read = true;
-    cached = loadConfig() ?? DEFAULT_CONFIG;
-  }
-  return cached;
-}
-
-export function getServerConfig() {
-  return DEFAULT_CONFIG;
-}
-
-export function setConfig(next: Config) {
-  cached = next;
-  saveConfig(next);
-  for (const listener of listeners) listener();
 }

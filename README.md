@@ -39,13 +39,13 @@ This writes `inhale.mp3`, `hold.mp3`, and `exhale.mp3` to
 ## Layout
 
 ```
-app/
-  _lib/breath.ts        timing math, presets, saved settings
-  _lib/sound.ts         tone and generated voice cues
-  _components/setup.tsx    the config screen
-  _components/session.tsx  the animated session
+src/
+  lib/breath.ts             timing math, presets, saved settings
+  lib/sound.ts              tone and generated voice cues
+  components/Setup.svelte   the config screen
+  components/Session.svelte the animated session
 scripts/voice/
-  generate.mjs          reusable OpenAI voice generator
+  generate.mjs              reusable OpenAI voice generator
 ```
 
 ## Checks
@@ -53,5 +53,11 @@ scripts/voice/
 ```bash
 bun run lint
 bun run build
-npx react-doctor@latest .
+```
+
+## Docker
+
+```bash
+docker build -t breath .
+docker run --rm -p 3000:3000 breath
 ```
