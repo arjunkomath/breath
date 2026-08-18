@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Session from "./components/Session.svelte";
-  import Setup from "./components/Setup.svelte";
+  import Session from "../components/Session.svelte";
+  import Setup from "../components/Setup.svelte";
   import {
     DEFAULT_CONFIG,
     loadConfig,
     saveConfig,
     type Config,
-  } from "./lib/breath";
-  import { primeAudio, primeVoice } from "./lib/sound";
+  } from "../lib/breath";
+  import { primeAudio, primeVoice } from "../lib/sound";
 
   let config = $state<Config>(DEFAULT_CONFIG);
   let runId = $state(0);

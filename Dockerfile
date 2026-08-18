@@ -10,7 +10,7 @@ COPY . .
 RUN bun run build
 
 FROM caddy:2.10-alpine
-COPY --from=builder /app/dist /srv
+COPY --from=builder /app/build /srv
 
 EXPOSE 3000
 CMD ["caddy", "file-server", "--root", "/srv", "--listen", ":3000"]

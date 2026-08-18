@@ -44,6 +44,7 @@ src/
   lib/sound.ts              tone and generated voice cues
   components/Setup.svelte   the config screen
   components/Session.svelte the animated session
+  routes/+page.svelte       the prerendered app page
 scripts/voice/
   generate.mjs              reusable OpenAI voice generator
 ```

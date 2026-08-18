@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "lint": "bun run check",
     "generate:voice": "node scripts/voice/generate.mjs"
   },
@@ -16,8 +16,10 @@
     "svelte": "^5.56.9"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@tailwindcss/vite": "^4",
     "@types/node": "^20",
     "svelte-check": "^4.7.6",
     "tailwindcss": "^4",

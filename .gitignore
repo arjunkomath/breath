@@ -14,7 +14,8 @@
 /coverage
 
 # production
-/dist
+/build
+/.svelte-kit/
 /.next/
 
 # misc

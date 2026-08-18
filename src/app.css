@@ -34,13 +34,10 @@
   --font-sans: "Archivo Variable", ui-sans-serif, sans-serif;
 }
 
-#app {
+body {
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-}
-
-body {
   background: var(--paper);
   color: var(--ink);
   font-family: "Archivo Variable", ui-sans-serif, sans-serif;

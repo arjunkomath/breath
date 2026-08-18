@@ -57,9 +57,9 @@
       content="https://og.techulus.cloud/api/image?title=Breath+%E2%80%94+Custom+Breathing+Timer&amp;content=Create+custom+breathing+exercises+with+flexible+phases%2C+guided+animations%2C+sound+cues%2C+and+ready-made+Box%2C+4-7-8%2C+and+Coherent+Breathing+presets."
     />
     <meta name="twitter:image:alt" content="Breath — Custom Breathing Timer" />
+    %sveltekit.head%
   </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
   </body>
 </html>
