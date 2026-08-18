@@ -29,8 +29,20 @@ export const metadata: Metadata = {
   ],
   manifest: "/manifest.json",
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png", sizes: "512x512" }],
-    apple: [{ url: "/logo.png", type: "image/png", sizes: "512x512" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/icon-48x48.png", type: "image/png", sizes: "48x48" },
+      { url: "/icons/icon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/icons/icon-192x192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512x512.png", type: "image/png", sizes: "512x512" },
+    ],
+    // iOS masks and composites these over an opaque backdrop, so they come
+    // from the un-rounded logo rather than the pre-rounded one.
+    apple: [
+      { url: "/icons/icon-152x152.png", type: "image/png", sizes: "152x152" },
+      { url: "/icons/icon-167x167.png", type: "image/png", sizes: "167x167" },
+      { url: "/icons/icon-180x180.png", type: "image/png", sizes: "180x180" },
+    ],
   },
   appleWebApp: {
     capable: true,

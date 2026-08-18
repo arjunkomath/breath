@@ -14,6 +14,8 @@ import { chime, cue, primeAudio, voiceCue } from "../_lib/sound";
 
 const START_DELAY = 3;
 const PETAL_ANGLES = Array.from({ length: 8 }, (_, index) => index * 45);
+const STACKED_ALPHA = 1 - 0.9 ** PETAL_ANGLES.length;
+const CLOSED_FADE = 0.01 / STACKED_ALPHA;
 
 type Props = {
   config: Config;
@@ -96,7 +98,11 @@ export default function Session({ config, onExit, onRestart }: Props) {
       phase.cycle * movingSlots,
     );
   const rotation = ((completedMovements + motionProgress) * 180) % 360;
-  const petalOffset = done ? 0 : (fullness * 100) / 6;
+  const openness = done ? 0 : fullness;
+  const petalOffset = (openness * 100) / 6;
+  // Eight petals at 10% alpha composite to ~57% once they stack, so the group
+  // is faded alongside them to leave the closed circle barely there.
+  const petalFade = CLOSED_FADE + (1 - CLOSED_FADE) * openness;
   const remaining = Math.max(1, Math.ceil(slot.seconds - phase.slotElapsed));
 
   const phaseKey = done ? -1 : phase.cycle * slots.length + phase.index;
@@ -165,7 +171,42 @@ export default function Session({ config, onExit, onRestart }: Props) {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-6 sm:py-10">
       <div className="relative size-[min(76vw,40vh,21rem)]">
-        <div className="absolute inset-0" aria-hidden="true">
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0 size-full -rotate-90"
+          aria-hidden="true"
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r="45"
+            fill="none"
+            strokeWidth="2.5"
+            className="stroke-accent opacity-20"
+          />
+          {progress > 0 && (
+            // pathLength normalises the circumference, so the dash offset is
+            // just the fraction of the session still to run.
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              fill="none"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={1 - progress}
+              className="stroke-accent"
+            />
+          )}
+        </svg>
+
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{ opacity: petalFade }}
+        >
           {PETAL_ANGLES.map((angle, index) => (
             <div
               key={angle}
@@ -207,17 +248,9 @@ export default function Session({ config, onExit, onRestart }: Props) {
         </div>
       </div>
 
-      <div className="mt-10 w-full max-w-sm sm:mt-16">
-        <div className="h-px w-full bg-rule">
-          <div
-            className="h-px bg-accent"
-            style={{ width: `${progress * 100}%` }}
-          />
-        </div>
-        <div className="mt-2 flex justify-between text-xs text-ink-faint tabular-nums">
-          <span>{formatClock(elapsed)}</span>
-          <span>{formatClock(planned)}</span>
-        </div>
+      <div className="mt-10 flex w-full max-w-sm justify-between text-xs text-ink-faint tabular-nums sm:mt-16">
+        <span>{formatClock(elapsed)}</span>
+        <span>{formatClock(planned)}</span>
       </div>
 
       <div className="mt-7 flex w-full max-w-sm gap-3 sm:mt-9">
