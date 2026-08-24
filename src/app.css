@@ -30,8 +30,8 @@
   --color-ink-faint: var(--ink-faint);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
-  --font-display: "Archivo Variable", ui-sans-serif, sans-serif;
-  --font-sans: "Archivo Variable", ui-sans-serif, sans-serif;
+  --font-display: system-ui, sans-serif;
+  --font-sans: system-ui, sans-serif;
 }
 
 body {
@@ -40,7 +40,7 @@ body {
   flex-direction: column;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Archivo Variable", ui-sans-serif, sans-serif;
+  font-family: system-ui, sans-serif;
   font-size: 1.125rem;
   font-stretch: 75%;
   letter-spacing: -0.02em;
@@ -70,6 +70,7 @@ button {
 input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
+  font-family: ui-monospace, monospace;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
