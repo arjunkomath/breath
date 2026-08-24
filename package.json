@@ -12,7 +12,6 @@
     "generate:voice": "bun scripts/voice/generate.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/archivo": "^5.3.0",
     "svelte": "^5.56.9"
   },
   "devDependencies": {
